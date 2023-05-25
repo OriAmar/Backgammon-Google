@@ -184,19 +184,19 @@ class GameManager:
 
     def are_there_more_dice(self):
         if self.cube_a.is_available and self.cube_b.is_available:
-            return True
+            pass
         else:
             return False
 
     def is_there_someone_in_jail(self):
         if self.player == PlayerColor.PLAYER_A:
             if self.jail[0].amount > 0:
-                return True
+                pass
             else:
                 return False
         if self.player == PlayerColor.PLAYER_B:
             if self.jail[1].amount > 0:
-                return True
+                pass
             else:
                 return False
 
@@ -205,7 +205,7 @@ class GameManager:
             if self.board[self.cube_a.value].amount < 2:
                 return True
             elif self.board[self.cube_b.value].amount < 2:
-                return True
+                return
         else:
             if self.board[23 - self.cube_a.value].amount < 2:
                 return True
@@ -355,7 +355,6 @@ class GameManager:
                     return False
 
     def select_target_a(self):
-        print("shalom from select target a")
         if self.player == PlayerColor.PLAYER_A:
             if self.cell_selection():
                  if self.cell_selected == self.target_cell_a:
@@ -391,7 +390,6 @@ class GameManager:
                         self.board[self.cell_selected].PlayerColor = self.player
 
     def select_target_b(self):
-        print("shalom from select target b")
         if self.player == PlayerColor.PLAYER_A:
             if self.cell_selected == self.target_cell_b:
                 if self.board[self.selected_cell + self.cube_b.value].PlayerColor == self.player:
@@ -426,11 +424,8 @@ class GameManager:
 
 
     def gamelogic(self):
-        if self.GameState == GameState.BEFORE_DICE_ROLL:
+        if GameState.BEFORE_DICE_ROLL:
             self.dice_roll()
-            if self.cube_a and self.cube_b != None:
-                self.condition_check()
-        elif self.GameState == GameState.MOVEMENT_1:
             if self.cell_selection():
                 if self.is_selected_cell_valid():
                     if self.is_target_cell_valid_a() or self.is_target_cell_valid_b():
@@ -440,21 +435,26 @@ class GameManager:
 
                 else:
                     print('not yours')
-        elif self.GameState == GameState.MOVEMENT_2:
-            if self.is_target_cell_valid_a():
-                print("target a available")
-                self.board[self.selected_cell].amount -= 1
-                self.board[self.target_cell_a].amount += 1
-            elif self.is_target_cell_valid_b():
-                self.board[self.selected_cell].amount -= 1
-                self.board[self.target_cell_b].amount += 1
-            else:
-                self.GameState = GameState.MOVEMENT_1
 
-        elif self.GameState == GameState.JAIL:
+        elif GameState.MOVEMENT_1:
+            print("movement")
+            if self.cell_selection():
+                print("cell selection")
+                if self.is_selected_cell_valid():
+                    print("is valid")
+                    if self.is_target_cell_valid_a() or self.is_target_cell_valid_b():
+                        self.GameState = GameState.MOVEMENT_2
+                    else:
+                        self.GameState = GameState.MOVEMENT_1
+
+                else:
+                    print('not yours')
+        elif GameState.MOVEMENT_2:
+            print('oko')
+        elif GameState.JAIL:
             pass
 
-        elif self.GameState == GameState.HOME_FULL:
+        elif GameState.HOME_FULL:
             for cell_i, cell in enumerate(self.board):
                 for event in pygame.event.get():
                     if event.type == pygame.MOUSEBUTTONDOWN:
@@ -476,7 +476,7 @@ class GameManager:
                                 self.GameState = GameState.VICTORY
 
 
-        elif self.GameState == GameState.VICTORY:
+        elif GameState.VICTORY:
             for cell in self.board:
                 if self.board[cell].PlayerColor == PlayerColor.PLAYER_A and self.board[cell].amount == 0:
                     print("you won")

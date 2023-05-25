@@ -78,6 +78,8 @@ class GameManager:
     def __init__(self):
         self.jail = []
         self.board = []
+        self.max_black_pikka = 15
+        self.max_white_pikka = 15
         self.player = PlayerColor.PLAYER_A
         self.running = True
         self.GameState = GameState.BEFORE_DICE_ROLL
@@ -89,6 +91,7 @@ class GameManager:
             self.player = PlayerColor.PLAYER_B
         else:
            self.player = PlayerColor.PLAYER_A
+        self.GameState = GameState.BEFORE_DICE_ROLL
 
     def starting_pos(self):
         for i in range(2):
@@ -207,7 +210,99 @@ class GameManager:
                                 self.switch_player()
                     else:
                         self.movement()
+    def condition_check(self):
+        if self.Are_there_more_dice():
+            if self.Is_there_someone_in_jail():
+               if self.any_available_cell_free_jail():
+                   self.GameState = GameState.JAIL
+               else:
+                   self.switch_player()
+            else:
+                if self.is_home_full():
+                    self.GameState = GameState.HOME_FULL
+                else:
+                    self.GameState = GameState.MOVEMENT_1
+        else:
+            self.switch_player()
+    def Are_there_more_dice(self):
+        if self.cube_a.is_available() and self.cube_b.is_available():
+            return True
+        else:
+            return False
+    def Is_there_someone_in_jail(self):
+        if self.player == PlayerColor.PLAYER_A:
+            if self.jail[1].amount > 0:
+                return True
+            else:
+                return False
+        else:
+            if self.jail[0].amount > 0:
+                return True
+            else:
+                return False
+    def any_available_cell_free_jail(self):
+        if self.player == PlayerColor.PLAYER_A:
+            if self.board[self.cube_a.value].amount < 2:
+                return True
+            elif self.board[self.cube_b.value].amount < 2:
+                return
+        else:
+            if self.board[23 - self.cube_a.value].amount < 2:
+                return True
+            elif self.board[23 - self.cube_b.value].amount < 2:
+                return True
+            else:
+                return False
+    def is_home_full(self):
+        if self.player == PlayerColor.PLAYER_A:
 
+            if self.board[0].amount + self.board[1].amount + self.board[2].amount + self.board[3].amount + self.board[4].amount + self.board[5].amount == self.max_black_pikka:
+                 return True
+            else:
+                return False
+        else:
+            if self.board[18].amount + self.board[1].amount + self.board[20].amount + self.board[21].amount + self.board[22].amount + self.board[23].amount == self.max_white_pikka:
+                return True
+            else:
+                return False
+
+
+    def cell_home_selection(self):
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                for cell_i, cell in enumerate(self.board):
+                    if cell.left_x < mouse_pos[0] < cell.right_x and cell.top_y < mouse_pos[1] < cell.bottom_y and self.player == cell.PlayerColor:
+                        cell.amount -= 1
+                        if self.board[cell_i + self.cube_a.value].PlayerColor == cell.PlayerColor:
+
+                            return True
+                    else:
+                        return False
+    def cell_target_selection(self, cell_i):
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                for cell_i, cell in enumerate(self.board):
+                    if cell.left_x < mouse_pos[0] < cell.right_x and cell.top_y < mouse_pos[1] < cell.bottom_y and self.player == cell.PlayerColor:
+                        return True
+                    elif cell.left_x < mouse_pos[0] < cell.right_x and cell.top_y < mouse_pos[1] < cell.bottom_y and self.player != cell.PlayerColor:
+                        return False
+
+    def is_valid_target(self):
+        for c_i in enumerate(self.board):
+            if self.board[c_i + self.cube_a.value].PlayerColor == self.player or self.board[c_i + self.cube_a.value].PlayerColor :
+                return True
+            if self.board[c_i + self.cube_a.value].PlayerColor == self.player:
+                return True
+    def movement_first (self):
+        if self.cell_selection():
+            if self.is_valid_target():
+                gamestate == movement2
+            else:
+                mo
+        else:
+            self.movement1()
     def gamelogic(self):
         if GameState.BEFORE_DICE_ROLL:
             print(self.cube_a.value, self.cube_b.value)
